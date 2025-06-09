@@ -7,7 +7,6 @@
 // @match        https://www.gwars.io/srating.php?rid=1*
 // @grant        none
 // ==/UserScript==
-
 ;(function () {
     'use strict'
 
@@ -19,21 +18,53 @@
     resultContainer.style.padding = '10px'
     resultContainer.style.border = '1px solid #888'
     resultContainer.style.background = '#f9f9f9'
-    resultContainer.innerHTML = '<h3>Таблица бойцов</h3>'
+    resultContainer.innerHTML = '<h3>Сводная таблица бойцов</h3>'
 
     const generateButton = document.createElement('button')
-    generateButton.textContent = 'Сгенерировать таблицу'
+    generateButton.textContent = 'Сгенерировать таблицу киборгов'
     generateButton.style.padding = '10px 20px'
     generateButton.style.fontSize = '14px'
     generateButton.style.cursor = 'pointer'
     generateButton.style.marginBottom = '10px'
 
+    const loadingIndicator = document.createElement('div')
+    loadingIndicator.style.fontWeight = 'bold'
+    loadingIndicator.style.marginBottom = '10px'
+    loadingIndicator.style.display = 'none'
+
+    const progressWrapper = document.createElement('div')
+    progressWrapper.style.width = '100%'
+    progressWrapper.style.background = '#ddd'
+    progressWrapper.style.borderRadius = '4px'
+    progressWrapper.style.overflow = 'hidden'
+    progressWrapper.style.marginBottom = '8px'
+    progressWrapper.style.display = 'none'
+
+    const progressBar = document.createElement('div')
+    progressBar.style.height = '20px'
+    progressBar.style.width = '0%'
+    progressBar.style.background = '#4caf50'
+    progressBar.style.transition = 'width 0.2s ease'
+    progressBar.style.textAlign = 'center'
+    progressBar.style.color = 'white'
+    progressBar.style.fontWeight = 'bold'
+    progressBar.style.fontSize = '12px'
+    progressBar.textContent = '0%'
+
+    progressWrapper.appendChild(progressBar)
+
     resultContainer.appendChild(generateButton)
+    resultContainer.appendChild(loadingIndicator)
+    resultContainer.appendChild(progressWrapper)
     document.body.prepend(resultContainer)
 
     generateButton.addEventListener('click', () => {
-        generateButton.disabled = true
-        generateButton.textContent = 'Загрузка...'
+        generateButton.style.display = 'none'
+        loadingIndicator.textContent = 'Загрузка... 0 / 0'
+        loadingIndicator.style.display = 'block'
+        progressWrapper.style.display = 'block'
+        progressBar.style.width = '0%'
+        progressBar.textContent = '0%'
 
         const syndicateLinks = [
             ...document.querySelectorAll('a[href*="/syndicate.php?id="]'),
@@ -49,6 +80,7 @@
             ),
         ]
 
+        loadingIndicator.textContent = `Загрузка... 0 / ${ids.length}`
         allRows.length = 0
         loadedCount = 0
 
@@ -96,7 +128,7 @@
                                 <a href="/syndicate.php?id=${syndId}">
                                     <img src="https://images.gwars.io/img/synds_hd/${syndId}.gif" width="20" height="14" border="0" class="usersign" title="#${syndId}">
                                 </a>
-                                <a href="${fighterHref}" target="_blank">${fighterName}</a>
+                                <a href="${fighterHref}" target="_blank" style="margin-left: 4px;">${fighterName}</a>
                             `
 
                             const row = [
@@ -114,10 +146,17 @@
                     }
 
                     loadedCount++
+                    const percent = Math.round((loadedCount / ids.length) * 100)
+                    progressBar.style.width = `${percent}%`
+                    progressBar.textContent = `${percent}%`
+                    loadingIndicator.textContent = `Загрузка... ${loadedCount} / ${ids.length}`
+
                     if (loadedCount === ids.length) {
                         renderFinalTable(allRows)
-                        generateButton.textContent =
-                            'Сгенерировать таблицу киборгов'
+                        progressBar.style.width = `100%`
+                        progressBar.textContent = `100%`
+                        loadingIndicator.textContent = `Готово: загружено ${loadedCount} синдикатов.`
+                        generateButton.style.display = 'inline-block'
                         generateButton.disabled = false
                     }
                 } catch (err) {
@@ -128,7 +167,6 @@
     })
 
     function renderFinalTable(rows) {
-        // Удалить старые таблицы (если были)
         const oldTables = resultContainer.querySelectorAll('table')
         oldTables.forEach((t) => t.remove())
 
