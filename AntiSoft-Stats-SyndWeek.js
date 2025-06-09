@@ -18,10 +18,10 @@
     resultContainer.style.padding = '10px'
     resultContainer.style.border = '1px solid #888'
     resultContainer.style.background = '#f9f9f9'
-    resultContainer.innerHTML = '<h3>Сводная таблица бойцов</h3>'
+    resultContainer.innerHTML = '<h3>Таблица бойцов</h3>'
 
     const generateButton = document.createElement('button')
-    generateButton.textContent = 'Сгенерировать таблицу киборгов'
+    generateButton.textContent = 'Сгенерировать таблицу'
     generateButton.style.padding = '10px 20px'
     generateButton.style.fontSize = '14px'
     generateButton.style.cursor = 'pointer'
