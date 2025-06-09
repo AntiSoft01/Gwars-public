@@ -105,7 +105,7 @@
                 } catch (e) {
                     console.warn('Ошибка загрузки рейтинга:', e)
                 }
-            }, 500)
+            }, 1e3)
         })
     })
 
@@ -118,86 +118,106 @@
         allRows.length = 0
         loadedCount = 0
 
-        ids.forEach((id) => {
-            const iframe = document.createElement('iframe')
-            iframe.src = `https://www.gwars.io/syndicate.php?id=${id}&page=stats&sp=2`
-            iframe.style.width = '0'
-            iframe.style.height = '0'
-            iframe.style.position = 'absolute'
-            iframe.style.visibility = 'hidden'
-            document.body.appendChild(iframe)
+        const queue = [...ids]
+        const MAX_CONCURRENT_IFRAMES = 5
+        let activeCount = 0
 
-            const tryParse = setInterval(() => {
-                try {
-                    const doc =
-                        iframe.contentDocument || iframe.contentWindow.document
-                    const statTable = [...doc.querySelectorAll('table')].find(
-                        (t) => {
+        function loadNext() {
+            if (queue.length === 0 && activeCount === 0) {
+                renderFinalTable(allRows)
+                progressBar.style.width = `100%`
+                progressBar.textContent = `100%`
+                loadingIndicator.textContent = `Готово: загружено ${loadedCount} синдикатов.`
+                generateButton.style.display = 'inline-block'
+                generateButton.disabled = false
+                return
+            }
+
+            while (activeCount < MAX_CONCURRENT_IFRAMES && queue.length > 0) {
+                const id = queue.shift()
+                activeCount++
+
+                const iframe = document.createElement('iframe')
+                iframe.src = `https://www.gwars.io/syndicate.php?id=${id}&page=stats&sp=2`
+                iframe.style.width = '0'
+                iframe.style.height = '0'
+                iframe.style.position = 'absolute'
+                iframe.style.visibility = 'hidden'
+                document.body.appendChild(iframe)
+
+                const tryParse = setInterval(() => {
+                    try {
+                        const doc =
+                            iframe.contentDocument ||
+                            iframe.contentWindow.document
+                        const statTable = [
+                            ...doc.querySelectorAll('table'),
+                        ].find((t) => {
                             const firstRow = t.rows[0]
                             return (
                                 firstRow &&
                                 firstRow.textContent.includes('Боец') &&
                                 firstRow.textContent.includes('Rp')
                             )
-                        }
-                    )
+                        })
 
-                    if (!statTable) return
+                        if (!statTable) return
 
-                    clearInterval(tryParse)
+                        clearInterval(tryParse)
 
-                    for (let i = 1; i < statTable.rows.length; i++) {
-                        const cells = statTable.rows[i].cells
-                        if (cells.length >= 6) {
-                            const fighterLink = cells[1].querySelector('a')
-                            const fighterName = fighterLink
-                                ? fighterLink.textContent.trim()
-                                : cells[1].innerText.trim()
-                            const fighterHref = fighterLink
-                                ? fighterLink.href
-                                : '#'
+                        for (let i = 1; i < statTable.rows.length; i++) {
+                            const cells = statTable.rows[i].cells
+                            if (cells.length >= 6) {
+                                const fighterLink = cells[1].querySelector('a')
+                                const fighterName = fighterLink
+                                    ? fighterLink.textContent.trim()
+                                    : cells[1].innerText.trim()
+                                const fighterHref = fighterLink
+                                    ? fighterLink.href
+                                    : '#'
 
-                            const syndId = id
-                            const fighterHTML = `
+                                const syndId = id
+                                const fighterHTML = `
                                 <a href="/syndicate.php?id=${syndId}">
                                     <img src="https://images.gwars.io/img/synds_hd/${syndId}.gif" width="20" height="14" border="0" class="usersign" title="#${syndId}">
                                 </a>
                                 <a href="${fighterHref}" target="_blank" style="margin-left: 4px;">${fighterName}</a>
                             `
 
-                            const row = [
-                                fighterHTML,
-                                cells[2].innerText.trim(),
-                                cells[3].innerText.trim(),
-                                cells[4].innerText.trim(),
-                                parseInt(
-                                    cells[5].innerText.trim().replace(/,/g, ''),
-                                    10
-                                ),
-                            ]
-                            allRows.push(row)
+                                const row = [
+                                    fighterHTML,
+                                    cells[2].innerText.trim(),
+                                    cells[3].innerText.trim(),
+                                    cells[4].innerText.trim(),
+                                    parseInt(
+                                        cells[5].innerText
+                                            .trim()
+                                            .replace(/,/g, ''),
+                                        10
+                                    ),
+                                ]
+                                allRows.push(row)
+                            }
                         }
-                    }
 
-                    loadedCount++
-                    const percent = Math.round((loadedCount / ids.length) * 100)
-                    progressBar.style.width = `${percent}%`
-                    progressBar.textContent = `${percent}%`
-                    loadingIndicator.textContent = `Загрузка... ${loadedCount} / ${ids.length}`
+                        loadedCount++
+                        const percent = Math.round(
+                            (loadedCount / ids.length) * 100
+                        )
+                        progressBar.style.width = `${percent}%`
+                        progressBar.textContent = `${percent}%`
+                        loadingIndicator.textContent = `Загрузка... ${loadedCount} / ${ids.length}`
 
-                    if (loadedCount === ids.length) {
-                        renderFinalTable(allRows)
-                        progressBar.style.width = `100%`
-                        progressBar.textContent = `100%`
-                        loadingIndicator.textContent = `Готово: загружено ${loadedCount} синдикатов.`
-                        generateButton.style.display = 'inline-block'
-                        generateButton.disabled = false
+                        activeCount--
+                        loadNext()
+                    } catch (err) {
+                        console.warn('Ошибка при чтении iframe', err)
                     }
-                } catch (err) {
-                    console.warn('Ошибка при чтении iframe', err)
-                }
-            }, 500)
-        })
+                }, 500)
+            }
+        }
+
+        loadNext()
     }
 
     function renderFinalTable(rows) {
