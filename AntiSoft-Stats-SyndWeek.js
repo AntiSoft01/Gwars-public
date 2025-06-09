@@ -7,6 +7,7 @@
 // @match        https://www.gwars.io/srating.php?rid=1*
 // @grant        none
 // ==/UserScript==
+
 ;(function () {
     'use strict'
 
@@ -60,27 +61,60 @@
 
     generateButton.addEventListener('click', () => {
         generateButton.style.display = 'none'
-        loadingIndicator.textContent = 'Загрузка... 0 / 0'
         loadingIndicator.style.display = 'block'
+        loadingIndicator.textContent = 'Загрузка списка синдикатов...'
+        progressWrapper.style.display = 'none'
+        progressBar.style.width = '0%'
+        progressBar.textContent = '0%'
+
+        const ratingPages = [0, 1, 2]
+        const syndicateIDs = new Set()
+        let ratingLoaded = 0
+
+        ratingPages.forEach((pid) => {
+            const iframe = document.createElement('iframe')
+            iframe.src = `https://www.gwars.io/srating.php?rid=1&page_id=${pid}`
+            iframe.style.width = '0'
+            iframe.style.height = '0'
+            iframe.style.position = 'absolute'
+            iframe.style.visibility = 'hidden'
+            document.body.appendChild(iframe)
+
+            const check = setInterval(() => {
+                try {
+                    const doc =
+                        iframe.contentDocument || iframe.contentWindow.document
+                    const links = [
+                        ...doc.querySelectorAll(
+                            'a[href*="/syndicate.php?id="]'
+                        ),
+                    ]
+                    links.forEach((a) => {
+                        const match = a.href.match(/id=(\d+)/)
+                        if (match) syndicateIDs.add(match[1])
+                    })
+
+                    clearInterval(check)
+                    ratingLoaded++
+                    loadingIndicator.textContent = `Получение списка синдикатов... ${ratingLoaded} / ${ratingPages.length}`
+
+                    if (ratingLoaded === ratingPages.length) {
+                        const ids = Array.from(syndicateIDs)
+                        startSyndicateLoading(ids)
+                    }
+                } catch (e) {
+                    console.warn('Ошибка загрузки рейтинга:', e)
+                }
+            }, 500)
+        })
+    })
+
+    function startSyndicateLoading(ids) {
+        loadingIndicator.textContent = `Загрузка... 0 / ${ids.length}`
         progressWrapper.style.display = 'block'
         progressBar.style.width = '0%'
         progressBar.textContent = '0%'
 
-        const syndicateLinks = [
-            ...document.querySelectorAll('a[href*="/syndicate.php?id="]'),
-        ]
-        const ids = [
-            ...new Set(
-                syndicateLinks
-                    .map((a) => {
-                        const match = a.href.match(/id=(\d+)/)
-                        return match ? match[1] : null
-                    })
-                    .filter(Boolean)
-            ),
-        ]
-
-        loadingIndicator.textContent = `Загрузка... 0 / ${ids.length}`
         allRows.length = 0
         loadedCount = 0
 
@@ -164,7 +198,7 @@
                 }
             }, 500)
         })
-    })
+    }
 
     function renderFinalTable(rows) {
         const oldTables = resultContainer.querySelectorAll('table')
