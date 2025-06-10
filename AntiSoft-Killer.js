@@ -10,95 +10,114 @@
 ;(function () {
     'use strict'
 
-    const npcUrls = [
-        'https://www.gwars.io/info.php?id=2401000&showattack=1',
-        'https://www.gwars.io/info.php?id=2319818&showattack=1',
-        'https://www.gwars.io/info.php?id=2376894&showattack=1',
-        'https://www.gwars.io/info.php?id=2408664&showattack=1',
-        'https://www.gwars.io/info.php?id=2368141&showattack=1',
-        'https://www.gwars.io/info.php?id=2409085&showattack=1',
-        'https://www.gwars.io/info.php?id=2410886&showattack=1',
-        'https://www.gwars.io/info.php?id=2410386&showattack=1',
-        'https://www.gwars.io/info.php?id=2405451&showattack=1',
-        'https://www.gwars.io/info.php?id=2402675&showattack=1',
-        'https://www.gwars.io/info.php?id=2319822&showattack=1',
-        'https://www.gwars.io/info.php?id=2334503&showattack=1',
-        'https://www.gwars.io/info.php?id=2410211&showattack=1',
-        'https://www.gwars.io/info.php?id=2408618&showattack=1',
-        'https://www.gwars.io/info.php?id=2407910&showattack=1',
-        'https://www.gwars.io/info.php?id=2410755&showattack=1',
-        'https://www.gwars.io/info.php?id=2318032&showattack=1',
-        'https://www.gwars.io/info.php?id=2410469&showattack=1',
-        'https://www.gwars.io/info.php?id=2403265&showattack=1',
-        'https://www.gwars.io/info.php?id=2397036&showattack=1',
-        'https://www.gwars.io/info.php?id=2405731&showattack=1',
-        'https://www.gwars.io/info.php?id=2315209&showattack=1',
-        'https://www.gwars.io/info.php?id=2407752&showattack=1',
-        'https://www.gwars.io/info.php?id=2402818&showattack=1',
-        'https://www.gwars.io/info.php?id=2393944&showattack=1',
-        'https://www.gwars.io/info.php?id=2411319&showattack=1',
+    function getStoredNpcUrls() {
+        const saved = localStorage.getItem('npcTargetList')
+        if (!saved) return []
+        return saved
+            .split('\n')
+            .map((line) => line.trim())
+            .filter(Boolean)
+            .map((entry) => {
+                if (/^\d+$/.test(entry)) {
+                    return `https://www.gwars.io/info.php?id=${entry}&showattack=1`
+                } else if (entry.includes('info.php?id=')) {
+                    const idMatch = entry.match(/id=(\d+)/)
+                    return idMatch
+                        ? `https://www.gwars.io/info.php?id=${idMatch[1]}&showattack=1`
+                        : null
+                }
+                return null
+            })
+            .filter(Boolean)
+    }
 
-        // new Dominance
-        'https://www.gwars.io/info.php?id=2407164&showattack=1',
-        'https://www.gwars.io/info.php?id=2410265&showattack=1',
-        'https://www.gwars.io/info.php?id=2410390&showattack=1',
-        'https://www.gwars.io/info.php?id=2398777&showattack=1',
+    function createInputArea(onLoadCallback) {
+        let existing = document.querySelector('#npc-input-wrapper')
+        if (existing) {
+            existing.style.display = 'block'
+            return
+        }
 
-        //
-        'https://www.gwars.io/info.php?id=2400862&showattack=1',
-        'https://www.gwars.io/info.php?id=2404734&showattack=1',
-        'https://www.gwars.io/info.php?id=2314768&showattack=1',
-        'https://www.gwars.io/info.php?id=2315317&showattack=1',
-        'https://www.gwars.io/info.php?id=2318179&showattack=1',
-        'https://www.gwars.io/info.php?id=2374157&showattack=1',
-        'https://www.gwars.io/info.php?id=2376663&showattack=1',
-        'https://www.gwars.io/info.php?id=2376889&showattack=1',
-        'https://www.gwars.io/info.php?id=2377293&showattack=1',
-        'https://www.gwars.io/info.php?id=2378495&showattack=1',
-        'https://www.gwars.io/info.php?id=2388143&showattack=1',
-        'https://www.gwars.io/info.php?id=2393941&showattack=1',
-        'https://www.gwars.io/info.php?id=2394530&showattack=1',
-        'https://www.gwars.io/info.php?id=2395037&showattack=1',
-        'https://www.gwars.io/info.php?id=2396322&showattack=1',
-        'https://www.gwars.io/info.php?id=2397522&showattack=1',
-        'https://www.gwars.io/info.php?id=2398717&showattack=1',
-        'https://www.gwars.io/info.php?id=2399929&showattack=1',
-        'https://www.gwars.io/info.php?id=2399966&showattack=1',
+        const wrapper = document.createElement('div')
+        wrapper.id = 'npc-input-wrapper'
+        wrapper.style.position = 'fixed'
+        wrapper.style.top = '50px'
+        wrapper.style.left = '10px'
+        wrapper.style.zIndex = 10000
+        wrapper.style.background = '#f0fff0'
+        wrapper.style.padding = '10px'
+        wrapper.style.border = '1px solid green'
+        wrapper.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)'
 
-        'https://www.gwars.io/info.php?id=2401338&showattack=1',
-        'https://www.gwars.io/info.php?id=2402814&showattack=1',
-        'https://www.gwars.io/info.php?id=2403295&showattack=1',
-        'https://www.gwars.io/info.php?id=2404442&showattack=1',
-        'https://www.gwars.io/info.php?id=2404663&showattack=1',
-        'https://www.gwars.io/info.php?id=2405022&showattack=1',
-        'https://www.gwars.io/info.php?id=2405288&showattack=1',
-        'https://www.gwars.io/info.php?id=2405844&showattack=1',
-        'https://www.gwars.io/info.php?id=2406866&showattack=1',
-        'https://www.gwars.io/info.php?id=2407170&showattack=1',
-        'https://www.gwars.io/info.php?id=2408301&showattack=1',
-        'https://www.gwars.io/info.php?id=2408471&showattack=1',
-        'https://www.gwars.io/info.php?id=2408598&showattack=1',
-        'https://www.gwars.io/info.php?id=2408454&showattack=1',
-        'https://www.gwars.io/info.php?id=2409260&showattack=1',
+        const textarea = document.createElement('textarea')
+        textarea.rows = 10
+        textarea.cols = 30
+        textarea.placeholder = 'Вставь ID или ссылки NPC, по одному в строку'
+        textarea.value = localStorage.getItem('npcTargetList') || ''
+        textarea.style.zIndex = 10001
+        textarea.style.width = '500px'
 
-        'https://www.gwars.io/info.php?id=2402453&showattack=1',
-        'https://www.gwars.io/info.php?id=2407801&showattack=1',
-        'https://www.gwars.io/info.php?id=2405067&showattack=1',
-        'https://www.gwars.io/info.php?id=2410763&showattack=1',
-        'https://www.gwars.io/info.php?id=2408478&showattack=1',
-        'https://www.gwars.io/info.php?id=2410731&showattack=1',
-        'https://www.gwars.io/info.php?id=2410477&showattack=1',
-        'https://www.gwars.io/info.php?id=2411319&showattack=1',
-        'https://www.gwars.io/info.php?id=2407125&showattack=1',
-        'https://www.gwars.io/info.php?id=2407834&showattack=1',
-        'https://www.gwars.io/info.php?id=2315185&showattack=1',
-        'https://www.gwars.io/info.php?id=2404184&showattack=1',
-        'https://www.gwars.io/info.php?id=2401129&showattack=1',
-        'https://www.gwars.io/info.php?id=2402151&showattack=1',
-        'https://www.gwars.io/info.php?id=2315063&showattack=1',
-        'https://www.gwars.io/info.php?id=2396475&showattack=1',
-    ]
+        const saveBtn = document.createElement('button')
+        saveBtn.textContent = 'Сохранить'
+        saveBtn.style.marginTop = '5px'
+        saveBtn.onclick = () => {
+            localStorage.setItem('npcTargetList', textarea.value.trim())
+            alert('Список сохранён! Обнови страницу или нажми кнопку загрузки.')
+        }
 
+        const loadBtn = document.createElement('button')
+        loadBtn.textContent = 'Загрузить NPC'
+        loadBtn.style.marginLeft = '5px'
+        loadBtn.onclick = () => {
+            wrapper.style.display = 'none'
+            onLoadCallback()
+        }
+
+        wrapper.appendChild(textarea)
+        wrapper.appendChild(document.createElement('br'))
+        wrapper.appendChild(saveBtn)
+        wrapper.appendChild(loadBtn)
+        document.body.appendChild(wrapper)
+    }
+
+    const showBtn = document.createElement('button')
+    showBtn.innerText = 'Показать список NPC'
+    showBtn.style.position = 'fixed'
+    showBtn.style.top = '10px'
+    showBtn.style.left = '10px'
+    showBtn.style.zIndex = 10000
+    document.body.appendChild(showBtn)
+
+    const toggleBtn = document.createElement('button')
+    toggleBtn.innerText = 'Показать / скрыть список'
+    toggleBtn.style.position = 'fixed'
+    toggleBtn.style.top = '10px'
+    toggleBtn.style.left = '10px'
+    toggleBtn.style.zIndex = 10000
+    toggleBtn.style.display = 'none'
+    document.body.appendChild(toggleBtn)
+
+    toggleBtn.onclick = () => {
+        const wrapper = document.querySelector('#npc-input-wrapper')
+        if (wrapper) {
+            wrapper.style.display =
+                wrapper.style.display === 'none' ? 'block' : 'none'
+        }
+    }
+
+    showBtn.onclick = () => {
+        showBtn.style.display = 'none'
+        toggleBtn.style.display = 'inline-block'
+        createInputArea(() => {
+            const urls = getStoredNpcUrls()
+            if (!urls.length) {
+                alert('Список пуст. Сначала добавь NPC.')
+                return
+            }
+            const table = new NPCTable(urls)
+            table.loadAll()
+        })
+    }
     class NPCEntry {
         constructor(url, tableBody) {
             this.url = url
@@ -410,18 +429,5 @@
                 batch.forEach((entry) => entry.reload())
             }, interval)
         }
-    }
-
-    const button = document.createElement('button')
-    button.innerText = 'Загрузить NPC'
-    button.style.position = 'fixed'
-    button.style.top = '30px'
-    button.style.right = '10px'
-    button.style.zIndex = 1000
-    document.body.appendChild(button)
-
-    button.onclick = () => {
-        const table = new NPCTable(npcUrls)
-        table.loadAll()
     }
 })()
