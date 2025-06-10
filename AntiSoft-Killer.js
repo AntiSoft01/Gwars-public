@@ -13,6 +13,7 @@
     function getStoredNpcUrls() {
         const saved = localStorage.getItem('npcTargetList')
         if (!saved) return []
+
         return saved
             .split('\n')
             .map((line) => line.trim())
@@ -40,22 +41,26 @@
 
         const wrapper = document.createElement('div')
         wrapper.id = 'npc-input-wrapper'
-        wrapper.style.position = 'fixed'
-        wrapper.style.top = '50px'
-        wrapper.style.right = '10px'
-        wrapper.style.zIndex = 10000
-        wrapper.style.background = '#f0fff0'
-        wrapper.style.padding = '10px'
-        wrapper.style.border = '1px solid green'
-        wrapper.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)'
+        Object.assign(wrapper.style, {
+            position: 'fixed',
+            top: '50px',
+            right: '10px',
+            zIndex: 10000,
+            background: '#f0fff0',
+            padding: '10px',
+            border: '1px solid green',
+            boxShadow: '0 0 10px rgba(0,0,0,0.5)',
+        })
 
         const textarea = document.createElement('textarea')
-        textarea.rows = 10
-        textarea.cols = 30
-        textarea.placeholder = 'Вставь ID или ссылки NPC, по одному в строку'
-        textarea.value = localStorage.getItem('npcTargetList') || ''
-        textarea.style.zIndex = 10001
+        Object.assign(textarea, {
+            rows: 10,
+            cols: 30,
+            placeholder: 'Вставь ID или ссылки NPC, по одному в строку',
+            value: localStorage.getItem('npcTargetList') || '',
+        })
         textarea.style.width = '500px'
+        textarea.style.zIndex = 10001
 
         const saveBtn = document.createElement('button')
         saveBtn.textContent = 'Сохранить'
@@ -80,21 +85,15 @@
         document.body.appendChild(wrapper)
     }
 
-    const showBtn = document.createElement('button')
-    showBtn.innerText = 'Показать список NPC'
-    showBtn.style.position = 'fixed'
-    showBtn.style.top = '10px'
-    showBtn.style.right = '10px'
-    showBtn.style.zIndex = 10000
-    document.body.appendChild(showBtn)
-
     const toggleBtn = document.createElement('button')
     toggleBtn.innerText = 'Показать / скрыть список'
-    toggleBtn.style.position = 'fixed'
-    toggleBtn.style.top = '10px'
-    toggleBtn.style.right = '10px'
-    toggleBtn.style.zIndex = 10000
-    toggleBtn.style.display = 'none'
+    Object.assign(toggleBtn.style, {
+        position: 'fixed',
+        top: '10px',
+        right: '10px',
+        zIndex: 10000,
+        display: 'none',
+    })
     document.body.appendChild(toggleBtn)
 
     toggleBtn.onclick = () => {
@@ -104,6 +103,16 @@
                 wrapper.style.display === 'none' ? 'block' : 'none'
         }
     }
+
+    const showBtn = document.createElement('button')
+    showBtn.innerText = 'Показать список NPC'
+    Object.assign(showBtn.style, {
+        position: 'fixed',
+        top: '10px',
+        right: '10px',
+        zIndex: 10000,
+    })
+    document.body.appendChild(showBtn)
 
     showBtn.onclick = () => {
         showBtn.style.display = 'none'
@@ -118,6 +127,7 @@
             table.loadAll()
         })
     }
+
     class NPCEntry {
         constructor(url, tableBody) {
             this.url = url
