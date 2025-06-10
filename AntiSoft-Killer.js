@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AntiSoft - Killer NPC list
 // @namespace    http://tampermonkey.net/
-// @version      5.1
+// @version      5.4
 // @description  Создаёт таблицу целей из списка киллера, сканирует режим, владельца, добавляет кнопку на быстрое сообщение
 // @match        https://www.gwars.io/info.php*
 // @grant        none
@@ -42,7 +42,7 @@
         wrapper.id = 'npc-input-wrapper'
         wrapper.style.position = 'fixed'
         wrapper.style.top = '50px'
-        wrapper.style.left = '10px'
+        wrapper.style.right = '10px'
         wrapper.style.zIndex = 10000
         wrapper.style.background = '#f0fff0'
         wrapper.style.padding = '10px'
@@ -84,7 +84,7 @@
     showBtn.innerText = 'Показать список NPC'
     showBtn.style.position = 'fixed'
     showBtn.style.top = '10px'
-    showBtn.style.left = '10px'
+    showBtn.style.right = '10px'
     showBtn.style.zIndex = 10000
     document.body.appendChild(showBtn)
 
@@ -92,7 +92,7 @@
     toggleBtn.innerText = 'Показать / скрыть список'
     toggleBtn.style.position = 'fixed'
     toggleBtn.style.top = '10px'
-    toggleBtn.style.left = '10px'
+    toggleBtn.style.right = '10px'
     toggleBtn.style.zIndex = 10000
     toggleBtn.style.display = 'none'
     document.body.appendChild(toggleBtn)
