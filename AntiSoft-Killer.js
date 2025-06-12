@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AntiSoft - Killer NPC list
 // @namespace    http://tampermonkey.net/
-// @version      5.4
+// @version      5.5
 // @description  Создаёт таблицу целей из списка киллера, сканирует режим, владельца, добавляет кнопку на быстрое сообщение
 // @match        https://www.gwars.io/info.php*
 // @grant        none
@@ -192,10 +192,12 @@
                 <td>${data.weapon}</td>
                 <td>${data.region}</td>
                 <td style="color:${data.hpColor}">${data.hp}</td>
-                <td><a href="${data.url}" target="_blank">${data.level} — ${data.nick}</a></td>
+                <td><a href="${data.url}" target="_blank">${data.level} — ${
+                data.nick
+            }</a></td>
                 <td>${ownerStatusHTML}</td>
                 <td style="${modeStyle}">${data.mode}</td>
-                <td style="$ {
+                <td class="limited-text" style="${
                     data.message.includes('Вы находитесь в другом секторе')
                         ? 'color:red;font-weight:bold;'
                         : data.message.includes('Владелец NPC не в игре')
@@ -394,19 +396,27 @@
             table.style.borderCollapse = 'collapse'
             table.style.backgroundColor = '#e9ffe9'
             table.innerHTML = `
-            <thead style="background-color:#d0eed0;">
-            <tr>
-                <th>Правое оружие</th>
-                <th>Район</th>
-                <th>ХП</th>
-                <th>Уровень — Ник</th>
-                <th>Владелец Статус</th>
-                <th>Режим</th>
-                <th>Сообщение</th>
-            </tr>
-            </thead>
-            <tbody></tbody>
-        `
+                <style>
+                    .limited-text {
+                        max-width: 300px;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+                </style>
+                <thead style="background-color:#d0eed0;">
+                <tr>
+                    <th>Правое оружие</th>
+                    <th>Район</th>
+                    <th>ХП</th>
+                    <th>Уровень — Ник</th>
+                    <th>Владелец Статус</th>
+                    <th>Режим</th>
+                    <th>Сообщение</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            `
 
             document.body.prepend(table)
             return table.querySelector('tbody')
