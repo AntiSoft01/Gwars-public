@@ -165,6 +165,7 @@
             this.row.dataset.isFollowing = isFollowing
             this.row.dataset.ownerStatus = isOnline ? '1' : '0'
             this.data = data
+            this.row.dataset.isFullHp = data.hpColor === 'green' ? '1' : '0'
 
             const modeStyle =
                 isFollowing && isOnline ? 'color:red;font-weight:bold;' : ''
@@ -217,12 +218,17 @@
                 const bFollow = b.dataset.isFollowing === 'true'
                 const aOnline = parseInt(a.dataset.ownerStatus || '0')
                 const bOnline = parseInt(b.dataset.ownerStatus || '0')
+                const aFullHp = a.dataset.isFullHp === '1'
+                const bFullHp = b.dataset.isFullHp === '1'
 
                 if (aFollow && aOnline && !(bFollow && bOnline)) return -1
                 if (!(aFollow && aOnline) && bFollow && bOnline) return 1
 
                 if (aOnline && !bOnline) return -1
                 if (!aOnline && bOnline) return 1
+
+                if (aFullHp && !bFullHp) return -1
+                if (!aFullHp && bFullHp) return 1
 
                 return 0
             })

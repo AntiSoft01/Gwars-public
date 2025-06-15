@@ -67,7 +67,7 @@
         progressBar.style.width = '0%'
         progressBar.textContent = '0%'
 
-        const ratingPages = [0, 1, 2]
+        const ratingPages = [0, 1, 2, 3, 4]
         const syndicateIDs = new Set()
         let ratingLoaded = 0
 
@@ -105,7 +105,7 @@
                 } catch (e) {
                     console.warn('Ошибка загрузки рейтинга:', e)
                 }
-            }, 1e3)
+            }, 800)
         })
     })
 
@@ -119,7 +119,7 @@
         loadedCount = 0
 
         const queue = [...ids]
-        const MAX_CONCURRENT_IFRAMES = 5
+        const MAX_CONCURRENT_IFRAMES = 1
         let activeCount = 0
 
         function loadNext() {
