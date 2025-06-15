@@ -315,17 +315,37 @@
                         }
 
                         let regionHTML = '-'
+
+                        const currentRegionSpan =
+                            document.querySelector('.movetoxyl')
+                        const currentRegionName =
+                            currentRegionSpan?.innerText.trim() || ''
+
                         const regionDiv = [...doc.querySelectorAll('div')].find(
                             (div) => div.innerText.includes('Район:')
                         )
                         const regionLink = doc.querySelector('a.movetoxy')
-                        if (regionDiv && regionLink) {
+
+                        if (regionDiv) {
                             const textMatch =
                                 regionDiv.innerText.match(/Район:\s*(.*)/)
                             const regionText = textMatch
                                 ? textMatch[1].trim()
-                                : regionLink.innerText.trim()
-                            regionHTML = `<a href="${regionLink.href}" target="_blank">${regionText}</a>`
+                                : ''
+
+                            if (regionText === currentRegionName) {
+                                regionHTML = '-'
+                            } else if (regionLink) {
+                                regionHTML = `<a href="${
+                                    regionLink.href
+                                }" target="_blank">${
+                                    regionText || regionLink.innerText.trim()
+                                }</a>`
+                            } else {
+                                regionHTML = regionText || 'Другой остров'
+                            }
+                        } else {
+                            regionHTML = 'Другой остров'
                         }
 
                         let ownerId = null
