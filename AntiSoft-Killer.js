@@ -10,6 +10,10 @@
 ;(function () {
     'use strict'
 
+    // делается 4 запроса каждые 4000мс, если неписей не больше 60 то это безопасный показатель
+    const totalRequests = 4
+    const requestsInterval = 4000
+
     function getStoredNpcUrls() {
         const saved = localStorage.getItem('npcTargetList')
         if (!saved) return []
@@ -448,8 +452,8 @@
         }
 
         scheduleUpdates() {
-            const batchSize = 4
-            const interval = 4000
+            const batchSize = totalRequests
+            const interval = requestsInterval
             setInterval(() => {
                 const batch = this.updateQueue.splice(0, batchSize)
                 batch.forEach((entry) => entry.reload())
