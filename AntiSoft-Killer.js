@@ -176,29 +176,30 @@
 
             const ownerStatusHTML =
                 data.ownerId && data.ownerStatus
-                    ? `<div style="text-align:right;">
-                    ${
-                        data.ownerStatus.syndId
-                            ? `<a href="/syndicate.php?id=${data.ownerStatus.syndId}">
+                    ? `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        ${
+                            data.ownerStatus.syndId
+                                ? `<a href="/syndicate.php?id=${data.ownerStatus.syndId}">
                                     <img src="https://images.gwars.io/img/synds_hd/${data.ownerStatus.syndId}.gif" width="20" height="14" border="0" class="usersign" title="#${data.ownerStatus.syndId}">
-                            </a> `
-                            : ''
-                    }
-                    <a href="/info.php?id=${data.ownerId}" target="_blank"><b>${
-                          data.ownerStatus.nick
-                      }</b></a>
-                    ${
-                        data.ownerStatus.status
-                            ? ` — ${data.ownerStatus.status}`
-                            : ''
-                    }
-                    ${
-                        data.ownerStatus.status === 'в игре'
-                            ? `<a href="https://www.gwars.io/sms-chat.php?id=${data.ownerId}" target="_blank">
-                                    <img src="https://images.gwars.io/i/letter.svg" width="25" style="vertical-align:middle;">
-                            </a>`
-                            : ''
-                    }
+                                </a>`
+                                : ''
+                        }
+                        <a href="/info.php?id=${
+                            data.ownerId
+                        }" target="_blank"><b>${data.ownerStatus.nick}</b></a>
+                    </div>
+                    <div style="text-align: right;">
+                        ${
+                            data.ownerStatus.status === 'в игре'
+                                ? ` - в игре
+                                    <a href="https://www.gwars.io/sms-chat.php?id=${data.ownerId}" target="_blank">
+                                        <img src="https://images.gwars.io/i/letter.svg" width="25" style="vertical-align:middle;">
+                                    </a>`
+                                : ''
+                        }
+                    </div>
                 </div>`
                     : '—'
 
