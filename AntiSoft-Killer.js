@@ -165,7 +165,7 @@
 
         updateRow(data) {
             const isFollowing = data.mode.includes('Следует за')
-            const isOnline = data.ownerStatus === 'в игре'
+            const isOnline = data.ownerStatus?.status === 'в игре'
             this.row.dataset.isFollowing = isFollowing
             this.row.dataset.ownerStatus = isOnline ? '1' : '0'
             this.data = data
@@ -174,24 +174,33 @@
             const modeStyle =
                 isFollowing && isOnline ? 'color:red;font-weight:bold;' : ''
 
-            const ownerStatusHTML = data.ownerId
-                ? `<div style="text-align:right;">
-                    <a href="https://www.gwars.io/info.php?id=${
-                        data.ownerId
-                    }" target="_blank">
-                        ${data.ownerId}${
-                      data.ownerStatus ? ' — ' + data.ownerStatus : ''
-                  }
-                    </a>
+            const ownerStatusHTML =
+                data.ownerId && data.ownerStatus
+                    ? `<div style="text-align:right;">
                     ${
-                        data.ownerStatus === 'в игре'
+                        data.ownerStatus.syndId
+                            ? `<a href="/syndicate.php?id=${data.ownerStatus.syndId}">
+                                    <img src="https://images.gwars.io/img/synds_hd/${data.ownerStatus.syndId}.gif" width="20" height="14" border="0" class="usersign" title="#${data.ownerStatus.syndId}">
+                            </a> `
+                            : ''
+                    }
+                    <a href="/info.php?id=${data.ownerId}" target="_blank"><b>${
+                          data.ownerStatus.nick
+                      }</b></a>
+                    ${
+                        data.ownerStatus.status
+                            ? ` — ${data.ownerStatus.status}`
+                            : ''
+                    }
+                    ${
+                        data.ownerStatus.status === 'в игре'
                             ? `<a href="https://www.gwars.io/sms-chat.php?id=${data.ownerId}" target="_blank">
                                     <img src="https://images.gwars.io/i/letter.svg" width="25" style="vertical-align:middle;">
-                                </a>`
+                            </a>`
                             : ''
                     }
                 </div>`
-                : '—'
+                    : '—'
 
             this.row.innerHTML = `
                 <td>${data.weapon}</td>
@@ -395,12 +404,33 @@
                 iframe.onload = () => {
                     try {
                         const doc = iframe.contentDocument
-                        const block =
-                            doc.getElementsByClassName('withborders')[0]
+
+                        const block = doc.querySelector('.withborders')
                         const text = block?.innerText || ''
-                        resolve(/Персонаж сейчас в/.test(text) ? 'в игре' : '')
+                        const isOnline = /Персонаж сейчас в/.test(text)
+
+                        const nick =
+                            doc.querySelector('#namespan')?.innerText.trim() ||
+                            ownerId
+
+                        let syndId = null
+                        try {
+                            const nameBlock =
+                                doc.querySelector('#namespan')?.parentElement
+                            const syndLink = nameBlock?.querySelector(
+                                'a[href*="syndicate.php?id="]'
+                            )
+                            const match = syndLink?.href.match(/id=(\d+)/)
+                            if (match) syndId = match[1]
+                        } catch {}
+
+                        resolve({
+                            status: isOnline ? 'в игре' : '',
+                            nick,
+                            syndId,
+                        })
                     } catch (e) {
-                        resolve('')
+                        resolve(null)
                     } finally {
                         iframe.remove()
                     }
