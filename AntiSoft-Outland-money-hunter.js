@@ -75,8 +75,8 @@
                     sectorDots[sector].push({ x, y, amount })
                 }
 
-                console.log('[GWars] Сектора с сейфами:', safeSectors)
-                console.log('[GWars] Точки сейфов:', sectorDots)
+                // console.log('[GWars] Сектора с сейфами:', safeSectors)
+                // console.log('[GWars] Точки сейфов:', sectorDots)
             }
         } catch (e) {
             console.warn('[GWars] Ошибка при парсинге сейфов:', e)
